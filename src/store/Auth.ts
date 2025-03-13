@@ -97,8 +97,20 @@ export const useAuthStore = create<IAuthStore>()(
             // Déconnexion
             async logout() {
                 try {
-                    await account.deleteSessions();
-                    set({ session: null, jwt: null, user: null });
+                    // ✅ Vérifier si l'utilisateur existe avant de supprimer la session
+                    try {
+                        await account.get();
+                    } catch (error) {
+                        console.warn("L'utilisateur n'existe plus, suppression locale de la session.");
+                        set({ session: null, jwt: null, user: null });
+                        return;
+                    }
+            
+                    await account.deleteSession("current");
+            
+                    setTimeout(() => {
+                        set({ session: null, jwt: null, user: null });
+                    }, 100);
                 } catch (error) {
                     console.error("Erreur lors de la déconnexion :", error);
                 }
