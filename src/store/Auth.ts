@@ -107,6 +107,8 @@ export const useAuthStore = create<IAuthStore>()(
                     }
             
                     await account.deleteSession("current");
+                    window.location.href = "/login";
+
             
                     setTimeout(() => {
                         set({ session: null, jwt: null, user: null });

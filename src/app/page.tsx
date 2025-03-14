@@ -1,101 +1,94 @@
-import Image from "next/image";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { databases } from "@/models/client/config";
+import { db, questionCollection, answerCollection, voteCollection } from "@/models/name";
+import { Query } from "appwrite";
+import Header from "@/components/Header";
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+export default function HomePage() {
+    const [questions, setQuestions] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const router = useRouter();
+
+    useEffect(() => {
+        async function fetchQuestions() {
+            try {
+                setLoading(true);
+                
+                // 🔹 Récupérer uniquement les dernières questions
+                const response = await databases.listDocuments(db, questionCollection, [
+                    Query.orderDesc("$createdAt"),
+                ]);
+
+                // 🔹 Récupérer les votes et réponses associées
+                const questionsWithDetails = await Promise.all(
+                    response.documents.map(async (question) => {
+                        const [answersResponse, votesResponse] = await Promise.all([
+                            databases.listDocuments(db, answerCollection, [
+                                Query.equal("questionId", question.$id),
+                                Query.orderDesc("$createdAt"),
+                            ]),
+                            databases.listDocuments(db, voteCollection, [
+                                Query.equal("type", "questions"),
+                                Query.equal("typeId", question.$id),
+                            ]),
+                        ]);
+
+                        return { 
+                            ...question, 
+                            answers: answersResponse.documents, 
+                            votes: votesResponse.total 
+                        };
+                    })
+                );
+
+                setQuestions(questionsWithDetails);
+            } catch (err) {
+                console.error("Erreur de chargement des questions", err);
+                setError("Impossible de charger les questions.");
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchQuestions();
+    }, []); 
+
+    if (loading) return <p className="text-center text-gray-500">Loading...</p>;
+    if (error) return <p className="text-red-500">{error}</p>;
+
+    return (
+        <div className=" min-h-screen text-black">
+            <Header />
+            <div className="max-w-4xl mx-auto p-6">
+                <h1 className="text-4xl font-bold mb-6">Recent Questions</h1>
+
+                <ul className="space-y-4">
+                    {questions.length > 0 ? (
+                        questions.map((question) => (
+                            <li 
+                                key={question.$id} 
+                                onClick={() => router.push(`/questions/${question.$id}`)}
+                                className="bg-white shadow-lg p-6 rounded-xl cursor-pointer transition-transform transform hover:-translate-y-1 hover:scale-[1.02] hover:border border-cyan-600"
+                            >
+                                <h2 className="text-xl font-semibold">{question.title}</h2>
+                                <p className="text-gray-400 mt-2">{question.content.substring(0, 100)}...</p>
+
+                                <div className="flex justify-between items-center mt-4">
+                                    <p className="text-gray-500 text-sm">🗨 {question.answers.length} answers</p>
+                                    <p className="text-orange-500 text-sm">⬆ {question.votes} votes</p>
+                                </div>
+                            </li>
+                        ))
+                    ) : (
+                        <p className="text-gray-500">No question yet.</p>
+                    )}
+                </ul>
+            </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    );
 }
