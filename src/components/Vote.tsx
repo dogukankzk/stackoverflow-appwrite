@@ -11,13 +11,13 @@ import { IconArrowUp, IconArrowDown } from "@tabler/icons-react";
 interface VoteProps {
     type: "questions" | "answers";
     typeId: string;
+    onVoteSuccess?: () => void; // ✅ Rafraîchir la page d'accueil après un vote
 }
 
-export default function Vote({ type, typeId }: VoteProps) {
+export default function Vote({ type, typeId, onVoteSuccess }: VoteProps) {
     const { session } = useAuthStore();
     const [voteCount, setVoteCount] = useState(0);
-    const [userVoteId, setUserVoteId] = useState<string | null>(null);
-    const [userVoteStatus, setUserVoteStatus] = useState<"upvoted" | "downvoted" | null>(null);
+    const [userVote, setUserVote] = useState<{ id: string; status: "upvoted" | "downvoted" } | null>(null);
 
     useEffect(() => {
         async function fetchVotes() {
@@ -27,14 +27,18 @@ export default function Vote({ type, typeId }: VoteProps) {
                     Query.equal("typeId", typeId),
                 ]);
 
-                // Mise à jour du compteur total de votes
-                setVoteCount(response.total);
+                // 🔥 Vérification des votes récupérés
+                console.log(`📌 Votes pour ${type} ${typeId}:`, response.documents);
+
+                // ✅ Calcul du nombre de votes
+                const upvotes = response.documents.filter(vote => vote.voteStatus === "upvoted").length;
+                const downvotes = response.documents.filter(vote => vote.voteStatus === "downvoted").length;
+                setVoteCount(upvotes - downvotes);
 
                 if (session) {
-                    const userVote = response.documents.find((vote) => vote.votedById === session.userId);
-                    if (userVote) {
-                        setUserVoteId(userVote.$id);
-                        setUserVoteStatus(userVote.voteStatus);
+                    const userVoteData = response.documents.find(vote => vote.votedById === session.userId);
+                    if (userVoteData) {
+                        setUserVote({ id: userVoteData.$id, status: userVoteData.voteStatus });
                     }
                 }
             } catch (error) {
@@ -46,30 +50,33 @@ export default function Vote({ type, typeId }: VoteProps) {
     }, [type, typeId, session]);
 
     async function handleVote(voteType: "upvoted" | "downvoted") {
-        if (!session) return alert("You must be logged in to vote.");
-        if (userVoteStatus === voteType) return;
+        if (!session) {
+            alert("You must be logged in to vote.");
+            return;
+        }
 
         try {
-            // Si l'utilisateur a déjà voté, supprimer son ancien vote
-            if (userVoteId) {
-                await databases.deleteDocument(db, voteCollection, userVoteId);
-                setVoteCount((prev) => (userVoteStatus === "upvoted" ? prev - 1 : prev + 1));
-                setUserVoteId(null);
-                setUserVoteStatus(null);
-                return;
+            if (userVote) {
+                await databases.deleteDocument(db, voteCollection, userVote.id);
+                setVoteCount(prev => userVote.status === "upvoted" ? prev - 1 : prev + 1);
+                setUserVote(null);
+
+                if (userVote.status === voteType) return;
             }
 
-            // Ajouter un nouveau vote
             const newVote = await databases.createDocument(db, voteCollection, ID.unique(), {
                 type,
                 typeId,
                 voteStatus: voteType,
-                votedById: session.userId, // 🔥 Correction ici !
+                votedById: session.userId, 
             });
 
-            setVoteCount((prev) => (voteType === "upvoted" ? prev + 1 : prev - 1));
-            setUserVoteId(newVote.$id);
-            setUserVoteStatus(voteType);
+            setVoteCount(prev => voteType === "upvoted" ? prev + 1 : prev - 1);
+            setUserVote({ id: newVote.$id, status: voteType });
+
+            if (onVoteSuccess) {
+                onVoteSuccess(); // ✅ Mettre à jour la page d'accueil après un vote
+            }
         } catch (error) {
             console.error("Erreur lors du vote", error);
         }
@@ -78,11 +85,11 @@ export default function Vote({ type, typeId }: VoteProps) {
     return (
         <div className="flex flex-col items-center">
             <Button onClick={() => handleVote("upvoted")} variant="ghost">
-                <IconArrowUp className={`h-6 w-6 ${userVoteStatus === "upvoted" ? "text-green-500" : "text-gray-500"}`} />
+                <IconArrowUp className={`h-6 w-6 ${userVote?.status === "upvoted" ? "text-green-500" : "text-gray-500"}`} />
             </Button>
             <span className="text-lg font-semibold">{voteCount}</span>
             <Button onClick={() => handleVote("downvoted")} variant="ghost">
-                <IconArrowDown className={`h-6 w-6 ${userVoteStatus === "downvoted" ? "text-red-500" : "text-gray-500"}`} />
+                <IconArrowDown className={`h-6 w-6 ${userVote?.status === "downvoted" ? "text-red-500" : "text-gray-500"}`} />
             </Button>
         </div>
     );

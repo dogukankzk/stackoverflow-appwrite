@@ -53,7 +53,7 @@ export default function AnswerForm({ questionId }: AnswerFormProps) {
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+                    className="mt-2 px-4 py-2 bg-black  text-white rounded cursor-pointer"
                 >
                     {isLoading ? "Submitting..." : "Submit Answer"}
                 </button>

@@ -5,7 +5,6 @@ import { Permission } from "node-appwrite"
 export default async function createAnswerCollection(){
     await databases.createCollection(db, answerCollection, answerCollection, [
         Permission.read("any"),
-        Permission.read("users"),
         Permission.create("users"),
         Permission.delete("users"),
         Permission.update("users")

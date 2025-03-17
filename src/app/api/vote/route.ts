@@ -8,6 +8,13 @@ export async function POST(request: NextRequest) {
     try {
         const { votedById, voteStatus, type, typeId } = await request.json();
 
+        if (!votedById) {
+            return NextResponse.json(
+                { error: "Missing required field: votedById" },
+                { status: 400 }
+            );
+        }        
+
         const response = await databases.listDocuments(db, voteCollection, [
             Query.equal("type", type),
             Query.equal("typeId", typeId),
@@ -40,8 +47,9 @@ export async function POST(request: NextRequest) {
                 type,
                 typeId,
                 voteStatus,
-                votedById,
+                votedById, 
             });
+            
 
             // Increate/Decrease the reputation of the question/answer author accordingly
             const questionOrAnswer = await databases.getDocument(
