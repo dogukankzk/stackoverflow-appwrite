@@ -29,7 +29,9 @@ export default function AnswerForm({ questionId }: AnswerFormProps) {
                 questionId,
                 content: newAnswer,
                 authorId: session.userId,
+                authorName: session.name, // 🔥 Ajout du nom de l'auteur
             });
+            
             setNewAnswer("");
         } catch (error) {
             setError("Failed to submit the answer.");

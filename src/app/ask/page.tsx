@@ -48,8 +48,9 @@ export default function AskQuestionPage() {
             await databases.createDocument(db, questionCollection, ID.unique(), {
                 title,
                 content,
-                tags, // ✅ Ajout des tags dans la question
+                tags, 
                 authorId: session.userId,
+                authorName: session.name,
             });
 
             setTitle("");
@@ -57,6 +58,7 @@ export default function AskQuestionPage() {
             setTags([]);
             setError("");
         } catch (error) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             setError("Failed to submit the question.", );
         } finally {
             setIsLoading(false);
