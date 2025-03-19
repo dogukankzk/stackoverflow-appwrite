@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState } from "react";
@@ -29,7 +30,6 @@ export default function AnswerForm({ questionId }: AnswerFormProps) {
                 questionId,
                 content: newAnswer,
                 authorId: session.userId,
-                authorName: session.name, // 🔥 Ajout du nom de l'auteur
             });
             
             setNewAnswer("");

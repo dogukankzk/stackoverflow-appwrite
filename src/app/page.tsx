@@ -9,7 +9,12 @@ import Header from "@/components/Header";
 import Vote from "@/components/Vote";
 
 export default function HomePage() {
-    const [questions, setQuestions] = useState<any[]>([]);
+    interface Question {
+        id: string;
+        title: string;
+        content: string;
+      }
+    const [questions, setQuestions] = useState<Question[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const router = useRouter();

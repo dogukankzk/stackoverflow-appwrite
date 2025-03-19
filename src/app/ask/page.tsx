@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState } from "react";
@@ -50,7 +51,6 @@ export default function AskQuestionPage() {
                 content,
                 tags, 
                 authorId: session.userId,
-                authorName: session.name,
             });
 
             setTitle("");
@@ -58,8 +58,7 @@ export default function AskQuestionPage() {
             setTags([]);
             setError("");
         } catch (error) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            setError("Failed to submit the question.", );
+            setError("Failed to submit the question.");
         } finally {
             setIsLoading(false);
         }
