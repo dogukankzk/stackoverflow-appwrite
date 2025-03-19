@@ -7,7 +7,7 @@ import { Query } from "appwrite";
 import { useParams, useRouter } from "next/navigation";
 import Vote from "@/components/Vote";
 import { useAuthStore } from "@/store/Auth";
-import AnswerForm from "./answer/page";
+import AnswerForm from "@/components/AnswerForm";
 
 interface Question {
     $id: string;
