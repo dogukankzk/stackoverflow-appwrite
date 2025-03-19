@@ -22,7 +22,7 @@ export default async function getOrCreateStorage() {
                 undefined,
                 ["jpg", "png", "gif", "jpeg", "webp", "heic"]
             );
-            console.log("✅ Storage created");
+            console.log("✅ Storage created", error);
         } catch (err) {
             console.error("❌ Error while creating storage:", err);
         }

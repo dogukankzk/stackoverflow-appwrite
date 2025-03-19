@@ -19,8 +19,8 @@ export interface IAuthStore {
 
     setHydrated(): void;
     verifySession(): Promise<void>;
-    login(email: string, password: string): Promise<{ success: boolean; error?: AppwriteException | null }>;
-    createAccount(name: string, email: string, password: string): Promise<{ success: boolean; error?: AppwriteException | null }>;
+    login(email: string, password: string): Promise<{ success: boolean; error?: string }>;
+    createAccount(name: string, email: string, password: string): Promise<{ success: boolean; error?: string }>;
     logout(): Promise<void>;
 }
 
@@ -44,7 +44,7 @@ export const useAuthStore = create<IAuthStore>()(
                     const session = await account.getSession("current");
                     const user = await account.get<UserPrefs>();
                     set({ session, user });
-                } catch (error) {
+                } catch (error: unknown) {
                     console.error("Erreur de vérification de session :", error);
                     set({ session: null, user: null, jwt: null });
                 }
@@ -71,11 +71,11 @@ export const useAuthStore = create<IAuthStore>()(
                     set({ session, user, jwt: jwtToken.jwt });
 
                     return { success: true };
-                } catch (error) {
+                } catch (error: unknown) {
                     console.error("Erreur de connexion :", error);
                     return {
                         success: false,
-                        error: error instanceof AppwriteException ? error : null
+                        error: error instanceof AppwriteException ? error.message : "An error occurred during login."
                     };
                 }
             },
@@ -85,11 +85,11 @@ export const useAuthStore = create<IAuthStore>()(
                 try {
                     await account.create(ID.unique(), email, password, name);
                     return { success: true };
-                } catch (error) {
+                } catch (error: unknown) {
                     console.error("Erreur lors de la création du compte :", error);
                     return {
                         success: false,
-                        error: error instanceof AppwriteException ? error : null
+                        error: error instanceof AppwriteException ? error.message : "An error occurred while creating the account."
                     };
                 }
             },
@@ -100,20 +100,19 @@ export const useAuthStore = create<IAuthStore>()(
                     // ✅ Vérifier si l'utilisateur existe avant de supprimer la session
                     try {
                         await account.get();
-                    } catch (error) {
-                        console.warn("L'utilisateur n'existe plus, suppression locale de la session.");
+                    } catch (error: unknown) {
+                        console.warn("L'utilisateur n'existe plus, suppression locale de la session.", error);
                         set({ session: null, jwt: null, user: null });
                         return;
                     }
-            
+
                     await account.deleteSession("current");
                     window.location.href = "/login";
 
-            
                     setTimeout(() => {
                         set({ session: null, jwt: null, user: null });
                     }, 100);
-                } catch (error) {
+                } catch (error: unknown) {
                     console.error("Erreur lors de la déconnexion :", error);
                 }
             }

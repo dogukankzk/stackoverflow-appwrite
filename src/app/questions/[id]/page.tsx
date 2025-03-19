@@ -9,12 +9,25 @@ import Vote from "@/components/Vote";
 import { useAuthStore } from "@/store/Auth";
 import AnswerForm from "./answer/page";
 
+interface Question {
+    $id: string;
+    title: string;
+    content: string;
+    authorId: string;
+}
+
+interface Answer {
+    $id: string;
+    content: string;
+    authorId: string;
+}
+
 export default function QuestionPage() {
     const params = useParams();
     const router = useRouter();
     const { session } = useAuthStore();
-    const [question, setQuestion] = useState<any>(null);
-    const [answers, setAnswers] = useState<any[]>([]);
+    const [question, setQuestion] = useState<Question | null>(null);
+    const [answers, setAnswers] = useState<Answer[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -23,16 +36,16 @@ export default function QuestionPage() {
 
             try {
                 // 🔹 Récupération de la question
-                const questionData = await databases.getDocument(db, questionCollection, params.id);
+                const questionData = await databases.getDocument<Question>(db, questionCollection, params.id);
                 setQuestion(questionData);
 
                 // 🔹 Récupération des réponses liées à cette question
-                const answersData = await databases.listDocuments(db, answerCollection, [
+                const answersData = await databases.listDocuments<Answer>(db, answerCollection, [
                     Query.equal("questionId", params.id),
                     Query.orderDesc("$createdAt"),
                 ]);
                 setAnswers(answersData.documents);
-            } catch (error) {
+            } catch (error: unknown) {
                 console.error("Erreur de chargement", error);
             } finally {
                 setLoading(false);
@@ -44,13 +57,13 @@ export default function QuestionPage() {
 
     // ✅ Supprimer la question si l'utilisateur est l'auteur
     async function handleDeleteQuestion() {
-        if (!session || session.userId !== question.authorId) return;
+        if (!session || !question || session.userId !== question.authorId) return;
 
         try {
             await databases.deleteDocument(db, questionCollection, question.$id);
             alert("Question supprimée !");
             router.push("/");
-        } catch (error) {
+        } catch (error: unknown) {
             console.error("Erreur lors de la suppression de la question", error);
         }
     }
@@ -62,7 +75,7 @@ export default function QuestionPage() {
         try {
             await databases.deleteDocument(db, answerCollection, answerId);
             setAnswers(answers.filter((a) => a.$id !== answerId));
-        } catch (error) {
+        } catch (error: unknown) {
             console.error("Erreur lors de la suppression de la réponse", error);
         }
     }
