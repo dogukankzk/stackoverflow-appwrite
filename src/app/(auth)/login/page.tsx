@@ -50,7 +50,16 @@ export default function Login() {
 
         const loginResponse = await login(email.toString(), password.toString());
         if (loginResponse.error) {
-            setError(() => loginResponse.error!.message);
+            setError(() => {
+                if (typeof loginResponse.error === "string") {
+                    return loginResponse.error;
+                } else if (loginResponse.error && "message" in loginResponse.error) {
+                    return (loginResponse.error as { message: string }).message;
+                }
+                return "An unexpected error occurred";
+            });
+            
+
         }
 
         setIsLoading(() => false);

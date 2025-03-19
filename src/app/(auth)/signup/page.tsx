@@ -56,11 +56,11 @@ export default function Register() {
         );
 
         if (response.error) {
-            setError(() => response.error!.message);
+            setError(() => String(response.error));
         } else {
             const loginResponse = await login(email.toString(), password.toString());
             if (loginResponse.error) {
-                setError(() => loginResponse.error!.message);
+                setError(() => String(loginResponse.error));
             }
         }
 

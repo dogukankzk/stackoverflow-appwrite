@@ -16,7 +16,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         if (session && publicPages.includes(pathname)) {
             router.push("/");
         }
-    }, [session, pathname, router]);
+    }, [session, pathname, router, publicPages]);
 
     return <div>{children}</div>;
 };

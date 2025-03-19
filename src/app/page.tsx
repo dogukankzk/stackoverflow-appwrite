@@ -13,7 +13,11 @@ export default function HomePage() {
         id: string;
         title: string;
         content: string;
-      }
+        answers: any[]; // ✅ Accepter un tableau d'objets
+        upvotes: number;
+        downvotes: number;
+    }
+    
     const [questions, setQuestions] = useState<Question[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -28,7 +32,7 @@ export default function HomePage() {
                 Query.orderDesc("$createdAt"),
             ]);
 
-            const questionsWithDetails = await Promise.all(
+            const questionsWithDetails: Question[] = await Promise.all(
                 response.documents.map(async (question) => {
                     const [answersResponse, votesResponse] = await Promise.all([
                         databases.listDocuments(db, answerCollection, [
@@ -40,19 +44,21 @@ export default function HomePage() {
                             Query.equal("typeId", question.$id),
                         ]),
                     ]);
-
+            
                     const upvotes = votesResponse.documents.filter(vote => vote.voteStatus === "upvoted").length;
                     const downvotes = votesResponse.documents.filter(vote => vote.voteStatus === "downvoted").length;
-
+            
                     return { 
-                        ...question, 
-                        answers: answersResponse.documents, 
-                        upvotes, 
+                        id: question.$id,
+                        title: question.title as string, // ✅ Assurer le bon type
+                        content: question.content as string, // ✅ Assurer le bon type
+                        answers: answersResponse.documents, // ✅ C'est bien un tableau
+                        upvotes,
                         downvotes
                     };
                 })
             );
-
+            
             setQuestions(questionsWithDetails);
         } catch (err) {
             console.error("Erreur de chargement des questions", err);
