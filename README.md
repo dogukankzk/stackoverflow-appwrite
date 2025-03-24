@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧠 Stack Overflow Clone
 
-## Getting Started
+A functional clone of Stack Overflow built using **Next.js**, **React**, **Tailwind CSS**, and **Appwrite** for backend services like authentication and database management.
 
-First, run the development server:
+---
 
-```bash
+## 🎥 Demo
+
+[![Watch the Demo](https://img.youtube.com/vi/gBQxiRG9h-E/0.jpg)](https://www.youtube.com/watch?v=gBQxiRG9h-E)
+
+---
+
+## 🚀 Features
+
+- 🔐 User authentication (register, login, logout) with Appwrite
+- 📝 Create, and delete questions
+- 💬 Add answers to questions
+- 👍 Upvote/downvote system
+- 🔍 Search bar to find questions
+- 🧑‍💻 User profile pages showing their questions
+- 🏷️ Filter questions by tags
+
+---
+
+## 🛠️ Technologies Used
+
+- **Frontend**: React, Next.js, Tailwind CSS
+- **Backend / BaaS**: Appwrite
+- **Routing**: Next.js App Router
+- **State Management**: useState, useEffect, custom hooks
+- **Tools**: CapCut (video editing), Serenity (screen recording)
+
+---
+
+## 🧪 Run Locally
+
+git clone https://github.com/dogukankzk/stackoverflow-appwrite.git
+cd stackoverflow-clone
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Don't forget to configure your environment variables for Appwrite in a .env.local file.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🙋‍♂️ About This Project
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This project was built as part of my fullstack learning journey. It helped me understand how to structure a complete app, use serverless backend tools like Appwrite, and create responsive interfaces using React and Tailwind CSS.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 📫 Contact
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Feel free to reach out!
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Email: dogukan.kazkondu.dev@gmail.com
