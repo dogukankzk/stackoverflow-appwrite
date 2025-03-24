@@ -34,11 +34,11 @@ A functional clone of Stack Overflow built using **Next.js**, **React**, **Tailw
 
 ## 🧪 Run Locally
 
-git clone https://github.com/dogukankzk/stackoverflow-appwrite.git
-cd stackoverflow-clone
-npm install
-npm run dev
-Don't forget to configure your environment variables for Appwrite in a .env.local file.
+- git clone https://github.com/dogukankzk/stackoverflow-appwrite.git
+- cd stackoverflow-clone
+- npm install
+- npm run dev
+- Don't forget to configure your environment variables for Appwrite in a .env.local file.
 
 ---
 
